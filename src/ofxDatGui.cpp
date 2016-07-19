@@ -962,6 +962,7 @@ void ofxDatGui::draw()
     ofPushStyle();
         ofFill();
         ofSetColor(mGuiBackground, mAlpha * 255);
+		ofSetRectMode(OF_RECTMODE_CORNER);
         if (mExpanded == false){
             ofDrawRectangle(mPosition.x, mPosition.y, mWidth, mGuiFooter->getHeight());
             mGuiFooter->draw();
