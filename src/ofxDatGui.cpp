@@ -433,8 +433,13 @@ ofxDatGuiFolder* ofxDatGui::addParameterGroup(ofParameterGroup& group)
 //			auto p = group.get<double>(i);
 ////			folder->addSlider(p);
 //		}
-		else if(type == typeid(ofParameter <bool> ).name()){
+		else if(type == typeid(ofParameter <bool> ).name())
+		{
 			folder->addToggle(group.getBool(i));
+		}
+		else if(type == typeid(ofParameter<ofColor>).name())
+		{
+			folder->addColorPicker(group.getColor(i));
 		}
 		else
 		{
