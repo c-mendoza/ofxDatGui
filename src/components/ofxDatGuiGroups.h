@@ -343,7 +343,17 @@ class ofxDatGuiFolder : public ofxDatGuiGroup {
             pickers.push_back(picker);
             return picker.get();
         }
-    
+	
+		ofxDatGuiColorPicker* addColorPicker(ofParameter<ofColor>& color)
+		{
+			shared_ptr<ofxDatGuiColorPicker> picker(new ofxDatGuiColorPicker(color));
+			picker->setStripeColor(mStyle.stripe.color);
+			picker->onColorPickerEvent(this, &ofxDatGuiFolder::dispatchColorPickerEvent);
+			attachItem(picker.get());
+			pickers.push_back(picker);
+			return picker.get();
+		}
+	
         ofxDatGuiFRM* addFRM(float refresh = 1.0f)
         {
             ofxDatGuiFRM* monitor = new ofxDatGuiFRM(refresh);

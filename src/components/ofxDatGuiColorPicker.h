@@ -58,7 +58,13 @@ class ofxDatGuiColorPicker : public ofxDatGuiTextInput {
             gColors.push_back(ofColor::white);  // top-left
             vbo.setColorData(&gColors[0], 6, GL_DYNAMIC_DRAW );
         }
-    
+	
+		ofxDatGuiColorPicker(ofParameter<ofColor> & pColor) : ofxDatGuiColorPicker(pColor.getName(), pColor)
+		{
+			paramColor = &pColor;
+			paramColor->addListener(this, &ofxDatGuiColorPicker::paramChanged);
+		}
+	
         void setTheme(const ofxDatGuiTheme* theme)
         {
             ofxDatGuiTextInput::setTheme(theme);
@@ -153,7 +159,11 @@ class ofxDatGuiColorPicker : public ofxDatGuiTextInput {
                     gColors[0] = ofColor(gColor.r/2, gColor.g/2, gColor.b/2);
                     vbo.setColorData(&gColors[0], 6, GL_DYNAMIC_DRAW );
                 }   else if (gradientRect.inside(m) && mMouseDown){
-                    mColor = gColor;
+					if(paramColor == nullptr) {
+						setColor(gColor);
+					} else {
+						*paramColor = gColor;
+					}
                 // dispatch event out to main application //
                     if (colorPickerEventCallback != nullptr) {
                         ofxDatGuiColorPickerEvent e(this, mColor);
@@ -161,7 +171,7 @@ class ofxDatGuiColorPicker : public ofxDatGuiTextInput {
                     }   else{
                         ofxDatGuiLog::write(ofxDatGuiMsg::EVENT_HANDLER_NULL);
                     }
-                    setTextFieldInputColor();
+//                    setTextFieldInputColor();
                 }
                 return true;
             }   else{
@@ -212,6 +222,11 @@ class ofxDatGuiColorPicker : public ofxDatGuiTextInput {
             }
         }
 
+		void paramChanged(ofColor& c)
+		{
+			setColor(c);
+		}
+	
         inline void setTextFieldInputColor()
         {
         // convert color value to a six character hex string //
@@ -228,7 +243,8 @@ class ofxDatGuiColorPicker : public ofxDatGuiTextInput {
 
         ofColor mColor;
         ofColor gColor;
-    
+		ofParameter<ofColor>* paramColor = nullptr;
+	
         struct {
             shared_ptr<ofImage> image;
             ofRectangle rect;
