@@ -52,12 +52,16 @@ class ofxDatGuiSlider : public ofxDatGuiComponent {
             mParamF = &p;
             setPrecision(2);
             calculateScale();
+			// TODO: Use newListener here instead, store it in a member somewhere.
+			// Once this gets nuked, the event listener will go away as well.
             mParamF->addListener(this, &ofxDatGuiSlider::onParamF);
         }
     
         ~ofxDatGuiSlider()
         {
             delete mInput;
+			if (mParamI) mParamI->removeListener(this, &ofxDatGuiSlider::onParamI);
+			if (mParamF) mParamF->removeListener(this, &ofxDatGuiSlider::onParamF);
         }
     
         void setTheme(const ofxDatGuiTheme* theme)
