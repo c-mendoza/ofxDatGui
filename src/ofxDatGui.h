@@ -35,6 +35,11 @@ class ofxDatGui : public ofxDatGuiInteractiveObject
     
         void draw();
         void update();
+	
+		/// Super shitty hacky method to make ofxDatGui work with my
+		/// ofxMTView trasforms. mouseX and mouseY should be in content coordinate system.
+		/// TODO: A less shitty hacky way to do this.
+		void update(int mouseX, int mouseY);
         void focus();
         void expand();
         void toggle();
@@ -59,7 +64,8 @@ class ofxDatGui : public ofxDatGuiInteractiveObject
         bool getAutoDraw();
         bool getMouseDown();
         ofPoint getPosition();
-    
+	
+		ofxDatGuiComponent* addComponent(ofxDatGuiComponent* c);
         ofxDatGuiHeader* addHeader(string label = "", bool draggable = true);
         ofxDatGuiFooter* addFooter();
         ofxDatGuiLabel* addLabel(string label);

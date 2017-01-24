@@ -235,6 +235,12 @@ string ofxDatGui::getAssetPath()
     add component methods
 */
 
+ofxDatGuiComponent* ofxDatGui::addComponent(ofxDatGuiComponent* c)
+{
+	attachItem(c);
+	return c;
+}
+
 ofxDatGuiHeader* ofxDatGui::addHeader(string label, bool draggable)
 {
     if (mGuiHeader == nullptr){
@@ -441,11 +447,17 @@ ofxDatGuiFolder* ofxDatGui::addParameterGroup(ofParameterGroup& group)
 		{
 			folder->addColorPicker(group.getColor(i));
 		}
+		else if(type == typeid(ofParameterGroup).name())
+		{
+			addParameterGroup(group.getGroup(i));
+		}
 		else
 		{
 			ofLog(OF_LOG_WARNING, "Type %s is not yet implemented in ofxDatGui::addParameterGroup", type.c_str());
 		}
 	}
+	
+	return folder;
 //		else if(type == typeid(ofParameter <ofVec2f> ).name()){
 //			auto p = _parameters.getVec2f(i);
 //			add(p);
@@ -901,7 +913,6 @@ void ofxDatGui::update()
     mWidthChanged = false;
     mThemeChanged = false;
     mAlignmentChanged = false;
-    
     // check for gui focus change //
     if (ofGetMousePressed() && mActiveGui->mMoving == false){
         ofPoint mouse = ofPoint(ofGetMouseX(), ofGetMouseY());
@@ -959,6 +970,88 @@ void ofxDatGui::update()
 // empty the trash //
     for (int i=0; i<trash.size(); i++) delete trash[i];
     trash.clear();
+}
+
+
+//Does the same thing as the update() above sans the calls to ofGetMouseX and
+//ofGetMouseY. This is to accommodate ofxMTView transformations.
+void ofxDatGui::update(int mouseX, int mouseY)
+{
+	if (!mVisible) return;
+	
+	// check if we need to update components //
+	for (int i=0; i<items.size(); i++) {
+		if (mAlphaChanged) items[i]->setOpacity(mAlpha);
+		if (mThemeChanged) items[i]->setTheme(mTheme);
+		if (mWidthChanged) items[i]->setWidth(mWidth, mLabelWidth);
+		if (mAlignmentChanged) items[i]->setLabelAlignment(mAlignment);
+	}
+	
+	if (mThemeChanged || mWidthChanged) layoutGui();
+	
+	mTheme = nullptr;
+	mAlphaChanged = false;
+	mWidthChanged = false;
+	mThemeChanged = false;
+	mAlignmentChanged = false;
+	
+	// check for gui focus change //
+	if (ofGetMousePressed() && mActiveGui->mMoving == false){
+		ofPoint mouse = ofPoint(mouseX, mouseY);
+		for (int i=mGuis.size()-1; i>-1; i--){
+			// ignore guis that are invisible //
+			if (mGuis[i]->getVisible() && mGuis[i]->hitTest(mouse)){
+				if (mGuis[i] != mActiveGui) mGuis[i]->focus();
+				break;
+			}
+		}
+	}
+	
+	if (!getFocused() || !mEnabled){
+		// update children but ignore mouse & keyboard events //
+		for (int i=0; i<items.size(); i++) items[i]->update(false);
+	}   else {
+		mMoving = false;
+		mMouseDown = false;
+		// this gui has focus so let's see if any of its components were interacted with //
+		if (mExpanded == false){
+			mGuiFooter->update();
+			mMouseDown = mGuiFooter->getMouseDown();
+		}   else{
+			bool hitComponent = false;
+			for (int i=0; i<items.size(); i++) {
+				if (hitComponent == false){
+					items[i]->update(true);
+					if (items[i]->getFocused()) {
+						hitComponent = true;
+						mMouseDown = items[i]->getMouseDown();
+						if (mGuiHeader != nullptr && mGuiHeader->getDraggable() && mGuiHeader->getFocused()){
+							// track that we're moving to force preserve focus //
+							mMoving = true;
+							ofPoint mouse = ofPoint(mouseX, mouseY);
+							moveGui(mouse - mGuiHeader->getDragOffset());
+						}
+					}   else if (items[i]->getIsExpanded()){
+						// check if one of its children has focus //
+						for (int j=0; j<items[i]->children.size(); j++) {
+							if (items[i]->children[j]->getFocused()){
+								hitComponent = true;
+								mMouseDown = items[i]->children[j]->getMouseDown();
+								break;
+							}
+						}
+					}
+				}   else{
+					// update component but ignore mouse & keyboard events //
+					items[i]->update(false);
+					if (items[i]->getFocused()) items[i]->setFocused(false);
+				}
+			}
+		}
+	}
+	// empty the trash //
+	for (int i=0; i<trash.size(); i++) delete trash[i];
+	trash.clear();
 }
 
 void ofxDatGui::draw()
