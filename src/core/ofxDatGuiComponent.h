@@ -166,6 +166,8 @@ class ofxDatGuiComponent : public ofxDatGuiInteractiveObject
         void drawBackground();
         void positionLabel();
         void setComponentStyle(const ofxDatGuiTheme* t);
-    
+	
+		// For ofParameters:
+		ofEventListener eventListener;
 };
 

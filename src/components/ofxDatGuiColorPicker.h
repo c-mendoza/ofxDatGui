@@ -62,7 +62,11 @@ class ofxDatGuiColorPicker : public ofxDatGuiTextInput {
 		ofxDatGuiColorPicker(ofParameter<ofColor> & pColor) : ofxDatGuiColorPicker(pColor.getName(), pColor)
 		{
 			paramColor = &pColor;
-			paramColor->addListener(this, &ofxDatGuiColorPicker::paramChanged);
+			eventListener = paramColor->newListener([this](ofColor& c)
+													{
+														setColor(c);
+													});
+//			paramColor->addListener(this, &ofxDatGuiColorPicker::paramChanged);
 		}
 	
         void setTheme(const ofxDatGuiTheme* theme)

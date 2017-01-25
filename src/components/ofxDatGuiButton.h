@@ -102,7 +102,18 @@ class ofxDatGuiToggle : public ofxDatGuiButton {
 		ofxDatGuiToggle(ofParameter<bool> & param) : ofxDatGuiToggle(param.getName(), param.get())
 		{
 			mParamBool = &param;
-			mParamBool->addListener(this, &ofxDatGuiToggle::onParamB);
+			eventListener = mParamBool->newListener([this](bool &v)
+													{
+														mChecked = v;
+														// dispatch event out to main application //
+														if (toggleEventCallback == nullptr) {
+															// attempt to call generic button callback //
+															ofxDatGuiButton::onMouseRelease(ofPoint(ofGetMouseX(), ofGetMouseY()));
+														} else {
+															toggleEventCallback(ofxDatGuiToggleEvent(this, mChecked));
+														}
+													});
+//			mParamBool->addListener(this, &ofxDatGuiToggle::onParamB);
 		}
 
         void setTheme(const ofxDatGuiTheme* theme)
@@ -155,7 +166,8 @@ class ofxDatGuiToggle : public ofxDatGuiButton {
         static ofxDatGuiToggle* getInstance() { return new ofxDatGuiToggle("X"); }
     
     protected:
-    
+	bool ignoreEventFlag = false;
+	
         void onMouseRelease(ofPoint m)
         {
 			mChecked = !mChecked;

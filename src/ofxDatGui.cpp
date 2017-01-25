@@ -74,7 +74,7 @@ void ofxDatGui::init()
 // assign focus to this newly created gui //
     mActiveGui = this;
     mGuis.push_back(this);
-    ofAddListener(ofEvents().windowResized, this, &ofxDatGui::onWindowResized, OF_EVENT_ORDER_BEFORE_APP);
+//    ofAddListener(ofEvents().windowResized, this, &ofxDatGui::onWindowResized, OF_EVENT_ORDER_BEFORE_APP);
 }
 
 /* 

@@ -46,15 +46,21 @@ class ofxDatGuiSlider : public ofxDatGuiComponent {
             mParamI = &p;
             setPrecision(0);
             calculateScale();
-            mParamI->addListener(this, &ofxDatGuiSlider::onParamI);
+			eventListener = mParamI->newListener([this](int& val)
+												 {
+													 this->onParamI(val);
+												 });
+//            mParamI->addListener(this, &ofxDatGuiSlider::onParamI);
         }
         ofxDatGuiSlider(ofParameter<float> & p) : ofxDatGuiSlider(p.getName(), p.getMin(), p.getMax(), p.get()) {
             mParamF = &p;
             setPrecision(2);
             calculateScale();
-			// TODO: Use newListener here instead, store it in a member somewhere.
-			// Once this gets nuked, the event listener will go away as well.
-            mParamF->addListener(this, &ofxDatGuiSlider::onParamF);
+			eventListener = mParamF->newListener([this](float& val)
+												 {
+													 this->onParamF(val);
+												 });
+//            mParamF->addListener(this, &ofxDatGuiSlider::onParamF);
         }
     
         ~ofxDatGuiSlider()
